@@ -10,7 +10,7 @@ class Socket:
 
     def open_connection(self, buffer_dir, buffer_file_name):
         buffer_path = buffer_dir + buffer_file_name
-        if self.player == 'alice':
+        if self.player == 'bob':
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             try:
                 sock.connect(buffer_path)
@@ -18,7 +18,7 @@ class Socket:
                 raise
             return sock
 
-        elif self.player == 'bob':
+        elif self.player == 'alice':
             try:
                 os.makedirs(buffer_dir)
             except OSError as e:
@@ -49,29 +49,29 @@ class Socket:
 
     def close(self, buffer_dir, buffer_file_name):
         self.conn.close()
-        if self.player == 'alice':
+        if self.player == 'bob':
             os.remove(buffer_dir + buffer_file_name)
 
 # test
 if (__name__ == "__main__"):
     MSG = {
-        'alice': b'I love you so so very much',
-        'bob':   b'I love you too my darling'
+        'bob': b'I love you so so very much',
+        'alice':   b'I love you too my darling'
     }
 
     player = sys.argv[1]
     sock = Socket(player, './buffer')
 
-    if (player == 'alice'): # alice sends first
-        sock.send(MSG['alice'])
-        message = sock.recv(len(MSG['bob'])).decode()
+    if (player == 'bob'): # bob sends first
+        sock.send(MSG['bob'])
+        message = sock.recv(len(MSG['alice'])).decode()
         print(message)
         sock.close()
 
-    elif (player == 'bob'): # bob sends second
-        message = sock.recv(len(MSG['alice'])).decode()
+    elif (player == 'alice'): # alice sends second
+        message = sock.recv(len(MSG['bob'])).decode()
         print(message)
-        sock.send(MSG['bob'])
+        sock.send(MSG['alice'])
         sock.close()
 
     else:
